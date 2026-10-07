@@ -1,13 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+
 from database.mongodb import salvar_vaga
+from crawler.tratamento import tratar_vaga
 
 URL = "https://programathor.com.br/jobs?contract_type=Est%C3%A1gio"
 BASE_URL = "https://programathor.com.br"
 
 
-# Função para coletar os links das vagas
 def coletar_links_vagas():
     response = requests.get(URL)
 
@@ -29,35 +30,44 @@ def coletar_links_vagas():
     return links_vagas
 
 
-# Função para acessar e coletar os dados de uma vaga
 def acessar_vaga(url):
     response = requests.get(url)
 
     soup = BeautifulSoup(response.text, "html.parser")
+
+    tecnologias_disponiveis = [
+        "Python",
+        "JavaScript",
+        "HTML",
+        "CSS",
+        "PHP",
+        "MySQL",
+        "Java",
+        "ReactJS",
+        "Node.js",
+        "TypeScript",
+        "SQL",
+        "Git",
+        "Laravel",
+        "Flutter",
+        "Dart",
+        "PostgreSQL"
+    ]
+
+    tecnologias = []
 
     links_pagina = soup.find_all("a")
 
     for link in links_pagina:
         texto = link.get_text(" ", strip=True)
 
-        if texto in [
-            "Python", "JavaScript", "HTML", "CSS", "PHP",
-            "MySQL", "Java", "ReactJS", "Node.js",
-            "TypeScript", "SQL", "Git", "Laravel",
-            "Flutter", "Dart", "PostgreSQL"
-        ]:
-            print(
-                "TECNOLOGIA:",
-                texto,
-                "| CLASSE:",
-                link.get("class")
-            )
+        if texto in tecnologias_disponiveis:
+            if texto not in tecnologias:
+                tecnologias.append(texto)
 
-    # Título e empresa
     titulo = soup.find("h1").get_text(" ", strip=True)
     empresa = soup.find("h2").get_text(" ", strip=True)
 
-    # Informações da vaga
     modalidade = ""
     localizacao = ""
     salario = ""
@@ -78,15 +88,20 @@ def acessar_vaga(url):
             modalidade = "Presencial"
 
         if texto.startswith("Localização:"):
-            localizacao = texto.replace("Localização:", "").strip()
+            localizacao = texto.replace(
+                "Localização:",
+                ""
+            ).strip()
 
         elif texto.startswith("Salário:"):
-            salario = texto.replace("Salário:", "").strip()
+            salario = texto.replace(
+                "Salário:",
+                ""
+            ).strip()
 
         elif texto in ["Júnior", "Pleno", "Sênior"]:
             nivel = texto
 
-    # Descrição, atividades e requisitos
     descricao = ""
     atividades = ""
     requisitos = ""
@@ -112,7 +127,6 @@ def acessar_vaga(url):
         elif nome_secao == "Requisitos":
             requisitos = texto
 
-    # Documento que futuramente será salvo no MongoDB
     vaga = {
         "titulo": titulo,
         "empresa": empresa,
@@ -120,6 +134,8 @@ def acessar_vaga(url):
         "localizacao": localizacao,
         "salario": salario,
         "nivel": nivel,
+        "contrato": "Estágio",
+        "tecnologias": tecnologias,
         "descricao": descricao,
         "atividades": atividades,
         "requisitos": requisitos,
@@ -139,8 +155,16 @@ if __name__ == "__main__":
     for link in links:
         try:
             vaga = acessar_vaga(link)
+            vaga_tratada = tratar_vaga(vaga)
 
-            salvar_vaga(vaga)
+            salvar_vaga(vaga_tratada)
+
+            print(
+                "Vaga salva:",
+                vaga_tratada["titulo"],
+                "| Tecnologias:",
+                vaga_tratada["tecnologias"]
+            )
 
         except Exception as erro:
             print("Erro ao coletar vaga:", link)

@@ -14,18 +14,11 @@ vagas_collection = db["vagas"]
 
 
 def salvar_vaga(vaga):
-    vaga_existente = vagas_collection.find_one({
-        "url": vaga["url"]
-    })
-
-    if vaga_existente:
-        print("Vaga já cadastrada:", vaga["titulo"])
-        return
-
-    vagas_collection.insert_one(vaga)
-
-    print("Vaga salva:", vaga["titulo"])
-
+    vagas_collection.update_one(
+        {"url": vaga["url"]},
+        {"$set": vaga},
+        upsert=True
+    )
 
 def listar_vagas():
     vagas = []
@@ -50,18 +43,89 @@ def buscar_vaga_por_id(id):
 
     return vaga
 
-def buscar_vagas(termo):
+def buscar_vagas(
+    termo=None,
+    tecnologias=None,
+    modalidade=None,
+    nivel=None,
+    contrato=None
+):
+    filtros = []
+
+    if termo:
+        filtros.append({
+            "$or": [
+                {"titulo": {"$regex": termo, "$options": "i"}},
+                {"empresa": {"$regex": termo, "$options": "i"}},
+                {"localizacao": {"$regex": termo, "$options": "i"}},
+                {"descricao": {"$regex": termo, "$options": "i"}},
+                {"atividades": {"$regex": termo, "$options": "i"}},
+                {"requisitos": {"$regex": termo, "$options": "i"}}
+            ]
+        })
+
+    if tecnologias:
+        for tecnologia in tecnologias:
+            filtros.append({
+                "tecnologias": {
+                    "$regex": f"^{tecnologia}$",
+                    "$options": "i"
+                }
+            })
+
+    if modalidade:
+        modalidades = {
+            "remoto": "Remoto",
+            "hibrido": "Híbrido",
+            "híbrido": "Híbrido",
+            "presencial": "Presencial"
+        }
+
+        modalidade_normalizada = modalidades.get(
+            modalidade.lower(),
+            modalidade
+        )
+
+        filtros.append({
+            "modalidade": modalidade_normalizada
+        })
+
+    if nivel:
+        niveis = {
+            "junior": "Júnior",
+            "júnior": "Júnior",
+            "pleno": "Pleno",
+            "senior": "Sênior",
+            "sênior": "Sênior"
+        }
+
+        nivel_normalizado = niveis.get(
+            nivel.lower(),
+            nivel
+        )
+
+        filtros.append({
+            "nivel": nivel_normalizado
+        })
+
+    if contrato:
+        contratos = {
+            "estagio": "Estágio",
+            "estágio": "Estágio"
+        }
+
+        contrato_normalizado = contratos.get(
+            contrato.lower(),
+            contrato
+        )
+
+        filtros.append({
+            "contrato": contrato_normalizado
+        })
+
     filtro = {
-        "$or": [
-            {"titulo": {"$regex": termo, "$options": "i"}},
-            {"empresa": {"$regex": termo, "$options": "i"}},
-            {"localizacao": {"$regex": termo, "$options": "i"}},
-            {"modalidade": {"$regex": termo, "$options": "i"}},
-            {"descricao": {"$regex": termo, "$options": "i"}},
-            {"atividades": {"$regex": termo, "$options": "i"}},
-            {"requisitos": {"$regex": termo, "$options": "i"}}
-        ]
-    }
+        "$and": filtros
+    } if filtros else {}
 
     vagas = []
 

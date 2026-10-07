@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from typing import Optional
+
 from database.mongodb import (
     listar_vagas,
     buscar_vaga_por_id,
@@ -20,12 +22,39 @@ def get_vagas():
 
 
 @router.get("/vagas/buscar")
-def pesquisar_vagas(termo: str):
-    vagas = buscar_vagas(termo)
+def pesquisar_vagas(
+    termo: Optional[str] = None,
+    tecnologias: Optional[str] = None,
+    modalidade: Optional[str] = None,
+    nivel: Optional[str] = None,
+    contrato: Optional[str] = None
+):
+    lista_tecnologias = None
+
+    if tecnologias:
+        lista_tecnologias = [
+            tecnologia.strip()
+            for tecnologia in tecnologias.split(",")
+            if tecnologia.strip()
+        ]
+
+    vagas = buscar_vagas(
+        termo=termo,
+        tecnologias=lista_tecnologias,
+        modalidade=modalidade,
+        nivel=nivel,
+        contrato=contrato
+    )
 
     return {
-        "termo": termo,
         "total": len(vagas),
+        "filtros": {
+            "termo": termo,
+            "tecnologias": lista_tecnologias,
+            "modalidade": modalidade,
+            "nivel": nivel,
+            "contrato": contrato
+        },
         "vagas": vagas
     }
 
@@ -40,8 +69,9 @@ def get_vaga_por_id(id: str):
     vaga = buscar_vaga_por_id(id)
 
     if not vaga:
-        return {
-            "erro": "Vaga não encontrada"
-        }
+        raise HTTPException(
+            status_code=404,
+            detail="Vaga não encontrada"
+        )
 
     return vaga
