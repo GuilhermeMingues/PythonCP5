@@ -1,5 +1,11 @@
 # TechJobs
 
+## Integrantes
+- Murillo Padula — RM571620
+- Guilherme Mingues — RM568670
+- Renato Munhoz — RM573579
+- Gabriel Vianna - RM571475
+
 Sistema acadêmico para **coleta, armazenamento, consulta e visualização de vagas de estágio na área de tecnologia**.
 
 O projeto utiliza Web Scraping para coletar vagas publicadas na Programathor, realiza o tratamento das informações, armazena os dados no MongoDB, disponibiliza as vagas por meio de uma API REST desenvolvida com FastAPI e apresenta os dados em um dashboard web.
