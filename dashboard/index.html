@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="TechJobs - Dashboard de vagas de estágio em tecnologia">
+
+    <title>
+        TechJobs | Dashboard de Vagas
+    </title>
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+
+<body>
+
+    <div class="app-shell">
+
+        <aside class="sidebar" aria-label="Navegação principal">
+
+            <div class="brand">
+
+                <img src="./assets/logo-techjobs.png" alt="Logo TechJobs" class="brand-logo">
+
+            </div>
+
+
+            <nav class="sidebar-nav">
+
+                <a href="#visao-geral" class="nav-item active">
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z" stroke="currentColor"
+                            stroke-width="1.8" stroke-linejoin="round" />
+
+                    </svg>
+
+                    Visão geral
+
+                </a>
+
+
+                <a href="#analises" class="nav-item">
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <path d="M5 20V10m7 10V4m7 16v-7" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" />
+
+                    </svg>
+
+                    Análises
+
+                </a>
+
+
+                <a href="#vagas" class="nav-item">
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <path
+                            d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-11 4h16M5 7h14a1 1 0 0 1 1 1v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a1 1 0 0 1 1-1Z"
+                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+
+                    </svg>
+
+                    Vagas
+
+                </a>
+
+            </nav>
+
+
+            <div class="sidebar-footer">
+
+                <div class="api-indicator">
+
+                    <span class="status-dot" id="apiStatusDot">
+                    </span>
+
+
+                    <div>
+
+                        <strong id="apiStatusText">
+                            Verificando API
+                        </strong>
+
+                        <span>
+                            FastAPI · localhost:8000
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <main class="main-content">
+
+
+            <header class="topbar" id="visao-geral">
+
+                <div>
+
+                    <p class="eyebrow">
+                        PAINEL ANALÍTICO
+                    </p>
+
+                    <h1>
+                        Dashboard de Vagas de Estágio em Tecnologia
+                    </h1>
+
+                    <p class="topbar-description">
+                        Dados coletados da Programathor e disponibilizados pela API TechJobs.
+                    </p>
+
+                </div>
+
+
+                <button class="refresh-button" id="refreshButton" type="button" title="Atualizar dados">
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <path d="M20 6v5h-5M4 18v-5h5M6.1 9A7 7 0 0 1 18.7 6.3L20 11M4 13l1.3 4.7A7 7 0 0 0 17.9 15"
+                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+
+                    </svg>
+
+                    Atualizar
+
+                </button>
+
+            </header>
+
+
+            <section class="alert hidden" id="errorAlert" role="alert">
+
+                <div class="alert-icon">
+                    !
+                </div>
+
+                <div>
+
+                    <strong>
+                        Não foi possível conectar à API.
+                    </strong>
+
+                    <p id="errorMessage">
+                        Confirme se o FastAPI está rodando em http://127.0.0.1:8000.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <section class="metrics-grid" aria-label="Indicadores principais">
+
+
+                <article class="metric-card">
+
+                    <div class="metric-icon purple">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <path
+                                d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M5 7h14a1 1 0 0 1 1 1v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a1 1 0 0 1 1-1Z"
+                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="metric-copy">
+
+                        <span>
+                            Total de vagas
+                        </span>
+
+                        <strong id="totalVagas">
+                            —
+                        </strong>
+
+                    </div>
+
+                </article>
+
+
+                <article class="metric-card">
+
+                    <div class="metric-icon blue">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <path d="M3 21h18M6 21V8l6-4 6 4v13M9 12h1m4 0h1m-6 4h1m4 0h1" stroke="currentColor"
+                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="metric-copy">
+
+                        <span>
+                            Empresas
+                        </span>
+
+                        <strong id="totalEmpresas">
+                            —
+                        </strong>
+
+                    </div>
+
+                </article>
+
+
+                <article class="metric-card">
+
+                    <div class="metric-icon cyan">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" stroke="currentColor"
+                                stroke-width="1.8" stroke-linecap="round" />
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="metric-copy">
+
+                        <span>
+                            Remotas
+                        </span>
+
+                        <strong id="totalRemoto">
+                            —
+                        </strong>
+
+                    </div>
+
+                </article>
+
+
+                <article class="metric-card">
+
+                    <div class="metric-icon amber">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <path d="M4 19V9l8-5 8 5v10M8 19v-6h8v6" stroke="currentColor" stroke-width="1.8"
+                                stroke-linejoin="round" />
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="metric-copy">
+
+                        <span>
+                            Híbridas
+                        </span>
+
+                        <strong id="totalHibrido">
+                            —
+                        </strong>
+
+                    </div>
+
+                </article>
+
+
+                <article class="metric-card">
+
+                    <div class="metric-icon green">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <path d="M12 21s6-5.1 6-11a6 6 0 1 0-12 0c0 5.9 6 11 6 11Z" stroke="currentColor"
+                                stroke-width="1.8" stroke-linejoin="round" />
+
+                            <circle cx="12" cy="10" r="2" stroke="currentColor" stroke-width="1.8" />
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="metric-copy">
+
+                        <span>
+                            Presenciais
+                        </span>
+
+                        <strong id="totalPresencial">
+                            —
+                        </strong>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+            <section class="charts-grid" id="analises">
+
+
+                <article class="panel chart-panel">
+
+                    <div class="panel-heading">
+
+                        <div>
+
+                            <span class="section-label">
+                                DISTRIBUIÇÃO
+                            </span>
+
+                            <h2>
+                                Vagas por modalidade
+                            </h2>
+
+                        </div>
+
+                        <span class="panel-badge">
+                            API /estatisticas
+                        </span>
+
+                    </div>
+
+
+                    <div class="chart-wrap doughnut-wrap">
+
+                        <canvas id="modalidadeChart"></canvas>
+
+                    </div>
+
+                </article>
+
+
+                <article class="panel chart-panel">
+
+                    <div class="panel-heading">
+
+                        <div>
+
+                            <span class="section-label">
+                                LOCALIZAÇÃO
+                            </span>
+
+                            <h2>
+                                Vagas por localização
+                            </h2>
+
+                        </div>
+
+                        <span class="panel-badge">
+                            API /vagas
+                        </span>
+
+                    </div>
+
+
+                    <div class="chart-wrap">
+
+                        <canvas id="localizacaoChart"></canvas>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+            <section class="panel jobs-panel" id="vagas">
+
+
+                <div class="jobs-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            OPORTUNIDADES
+                        </span>
+
+                        <h2>
+                            Vagas disponíveis
+                        </h2>
+
+                        <p>
+                            Pesquise e combine filtros. Os resultados são consultados diretamente na FastAPI.
+                        </p>
+
+                    </div>
+
+
+                    <div class="results-counter">
+
+                        <strong id="resultsCount">
+                            0
+                        </strong>
+
+                        <span>
+                            resultados
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="search-row">
+
+                    <div class="search-box">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" />
+
+                            <path d="m20 20-4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+
+                        </svg>
+
+
+                        <input type="search" id="searchInput"
+                            placeholder="Pesquisar por Python, Java, empresa, São Paulo..." autocomplete="off">
+
+                    </div>
+
+
+                    <button class="primary-button" id="searchButton" type="button">
+                        Pesquisar
+                    </button>
+
+
+                    <button class="filter-toggle" id="filterToggle" type="button" aria-expanded="false"
+                        aria-controls="advancedFilters">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <path d="M4 6h16M7 12h10m-7 6h4" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" />
+
+                        </svg>
+
+                        Filtros
+
+
+                        <span class="filter-count hidden" id="filterCount">
+                            0
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <div class="advanced-filters hidden" id="advancedFilters">
+
+
+                    <div class="filter-group">
+
+                        <span class="filter-title">
+                            Tecnologias
+                        </span>
+
+                        <div class="check-grid" id="technologyFilters">
+                        </div>
+
+                    </div>
+
+
+                    <div class="filter-group">
+
+                        <span class="filter-title">
+                            Modalidade
+                        </span>
+
+                        <div class="check-row">
+
+                            <label class="check-chip">
+
+                                <input type="checkbox" name="modalidade" value="remoto">
+
+                                <span>
+                                    Remoto
+                                </span>
+
+                            </label>
+
+
+                            <label class="check-chip">
+
+                                <input type="checkbox" name="modalidade" value="hibrido">
+
+                                <span>
+                                    Híbrido
+                                </span>
+
+                            </label>
+
+
+                            <label class="check-chip">
+
+                                <input type="checkbox" name="modalidade" value="presencial">
+
+                                <span>
+                                    Presencial
+                                </span>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="filter-group">
+
+                        <span class="filter-title">
+                            Nível
+                        </span>
+
+                        <div class="check-row">
+
+                            <label class="check-chip">
+
+                                <input type="checkbox" name="nivel" value="junior">
+
+                                <span>
+                                    Júnior
+                                </span>
+
+                            </label>
+
+
+                            <label class="check-chip">
+
+                                <input type="checkbox" name="nivel" value="pleno">
+
+                                <span>
+                                    Pleno
+                                </span>
+
+                            </label>
+
+
+                            <label class="check-chip">
+
+                                <input type="checkbox" name="nivel" value="senior">
+
+                                <span>
+                                    Sênior
+                                </span>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="filter-group">
+
+                        <span class="filter-title">
+                            Contrato
+                        </span>
+
+                        <div class="check-row">
+
+                            <label class="check-chip">
+
+                                <input type="checkbox" name="contrato" value="estagio">
+
+                                <span>
+                                    Estágio
+                                </span>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="filter-actions">
+
+                        <button class="text-button" id="clearFiltersButton" type="button">
+                            Limpar filtros
+                        </button>
+
+
+                        <button class="primary-button compact" id="applyFiltersButton" type="button">
+                            Aplicar filtros
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="active-filters hidden" id="activeFilters">
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Vaga
+                                </th>
+
+                                <th>
+                                    Localização
+                                </th>
+
+                                <th>
+                                    Modalidade
+                                </th>
+
+                                <th>
+                                    Salário
+                                </th>
+
+                                <th>
+                                    Nível
+                                </th>
+
+                                <th class="action-column">
+                                    Ação
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="jobsTableBody">
+                        </tbody>
+
+                    </table>
+
+
+                    <div class="loading-state" id="loadingState">
+
+                        <div class="spinner"></div>
+
+                        <strong>
+                            Carregando vagas...
+                        </strong>
+
+                        <span>
+                            Consultando a API TechJobs
+                        </span>
+
+                    </div>
+
+
+                    <div class="empty-state hidden" id="emptyState">
+
+                        <div class="empty-icon">
+
+                            <svg viewBox="0 0 24 24" fill="none">
+
+                                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" />
+
+                                <path d="m20 20-4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+
+                            </svg>
+
+                        </div>
+
+
+                        <strong>
+                            Nenhuma vaga encontrada
+                        </strong>
+
+                        <span>
+                            Tente alterar o termo ou remover alguns filtros.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <footer class="footer">
+
+                <span>
+                    TechJobs · Projeto acadêmico
+                </span>
+
+                <span>
+                    Programathor → Crawler → MongoDB → FastAPI → Dashboard
+                </span>
+
+            </footer>
+
+        </main>
+
+    </div>
+
+
+    <div class="modal-backdrop hidden" id="jobModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+        <div class="modal-card">
+
+            <button class="modal-close" id="modalClose" type="button" aria-label="Fechar detalhes">
+                ×
+            </button>
+
+
+            <div class="modal-loading hidden" id="modalLoading">
+
+                <div class="spinner"></div>
+
+                <span>
+                    Carregando detalhes...
+                </span>
+
+            </div>
+
+
+            <div id="modalContent">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js">
+    </script>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

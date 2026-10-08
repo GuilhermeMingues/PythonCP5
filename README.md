@@ -1,15 +1,12 @@
 # TechJobs
 
-API para coleta, armazenamento e consulta de vagas de estágio na área de tecnologia.
+Sistema acadêmico para **coleta, armazenamento, consulta e visualização de vagas de estágio na área de tecnologia**.
 
-O projeto utiliza Web Scraping para coletar vagas publicadas na Programathor, realiza o tratamento das informações, armazena os dados no MongoDB e disponibiliza as vagas através de uma API REST desenvolvida com FastAPI.
-
-A aplicação também possui atualização automática das vagas e permite realizar buscas utilizando múltiplos filtros simultaneamente.
+O projeto utiliza Web Scraping para coletar vagas publicadas na Programathor, realiza o tratamento das informações, armazena os dados no MongoDB, disponibiliza as vagas por meio de uma API REST desenvolvida com FastAPI e apresenta os dados em um dashboard web.
 
 ## Tecnologias
 
-O projeto utiliza:
-
+### Backend
 - Python
 - FastAPI
 - Uvicorn
@@ -18,10 +15,18 @@ O projeto utiliza:
 - BeautifulSoup
 - Requests
 - python-dotenv
+- pip-system-certs
+
+### Front-end
+- HTML5
+- CSS3
+- JavaScript
+- Fetch API
+- Chart.js
 
 ## Arquitetura
 
-O fluxo principal da aplicação funciona da seguinte maneira:
+O fluxo principal da aplicação é:
 
 ```text
 Programathor
@@ -34,12 +39,16 @@ MongoDB
       ↓
 FastAPI
       ↓
-Front-end
+Fetch API
+      ↓
+Dashboard
 ```
 
 O crawler coleta as vagas disponíveis na Programathor e envia os dados tratados para o MongoDB.
 
 A API consulta o banco de dados e disponibiliza as informações para o front-end.
+
+O dashboard **não acessa diretamente o MongoDB** e **não realiza scraping**. Todos os dados exibidos na interface são obtidos exclusivamente por meio da FastAPI.
 
 ## Estrutura do projeto
 
@@ -60,6 +69,12 @@ PythonCP5/
 │   ├── __init__.py
 │   └── mongodb.py
 │
+├── dashboard/
+│   ├── index.html
+│   ├── style.css
+│   ├── script.js
+│   └── logo-techjobs.png
+│
 ├── .env
 ├── .gitignore
 ├── requirements.txt
@@ -68,7 +83,7 @@ PythonCP5/
 
 ## Funcionalidades
 
-Atualmente o projeto possui:
+O projeto possui:
 
 - Coleta automática de vagas da Programathor
 - Web Scraping com BeautifulSoup
@@ -88,6 +103,16 @@ Atualmente o projeto possui:
 - Tratamento de vagas inexistentes
 - Atualização automática através de scheduler
 - CORS configurado para integração com o front-end
+- Dashboard responsivo
+- Cards de indicadores
+- Gráfico de vagas por modalidade
+- Gráfico de vagas por localização
+- Pesquisa utilizando a API
+- Filtros por tecnologia, modalidade, nível e contrato
+- Tabela com as vagas coletadas
+- Modal com detalhes da vaga
+- Link para a vaga original
+- Estados de loading, erro e ausência de resultados
 
 ## Informações coletadas
 
@@ -95,23 +120,23 @@ Cada vaga armazenada no MongoDB possui informações como:
 
 ```json
 {
-    "titulo": "Estágio Desenvolvedor Python",
-    "empresa": "Empresa",
-    "modalidade": "Híbrido",
-    "localizacao": "São Paulo",
-    "salario": "Até R$2.500",
-    "nivel": "Júnior",
-    "contrato": "Estágio",
-    "tecnologias": [
-        "Python",
-        "JavaScript"
-    ],
-    "descricao": "...",
-    "atividades": "...",
-    "requisitos": "...",
-    "url": "...",
-    "fonte": "Programathor",
-    "coletado_em": "..."
+  "titulo": "Estágio Desenvolvedor Python",
+  "empresa": "Empresa",
+  "modalidade": "Híbrido",
+  "localizacao": "São Paulo",
+  "salario": "Até R$2.500",
+  "nivel": "Júnior",
+  "contrato": "Estágio",
+  "tecnologias": [
+    "Python",
+    "JavaScript"
+  ],
+  "descricao": "...",
+  "atividades": "...",
+  "requisitos": "...",
+  "url": "...",
+  "fonte": "Programathor",
+  "coletado_em": "..."
 }
 ```
 
@@ -136,11 +161,11 @@ O crawler atualmente identifica tecnologias como:
 - Flutter
 - Dart
 
-As tecnologias são armazenadas em uma lista dentro de cada vaga, permitindo realizar filtros específicos.
+As tecnologias são armazenadas em uma lista dentro de cada vaga, permitindo filtros específicos.
 
-## Instalação
+# Instalação
 
-### 1. Clone o repositório
+## 1. Clone o repositório
 
 ```bash
 git clone URL_DO_REPOSITORIO
@@ -152,15 +177,15 @@ Entre na pasta:
 cd PythonCP5
 ```
 
-### 2. Crie um ambiente virtual
+## 2. Crie um ambiente virtual
 
 ```bash
 python -m venv .venv
 ```
 
-### 3. Ative o ambiente virtual
+## 3. Ative o ambiente virtual
 
-PowerShell:
+### PowerShell
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -178,21 +203,21 @@ Depois:
 .\.venv\Scripts\Activate.ps1
 ```
 
-Git Bash:
+### Git Bash
 
 ```bash
 source .venv/Scripts/activate
 ```
 
-### 4. Instale as dependências
+## 4. Instale as dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Configuração do MongoDB
+O projeto também utiliza `pip-system-certs`, incluído no `requirements.txt`, para melhorar a compatibilidade com certificados SSL do Windows durante as requisições HTTPS do crawler.
 
-O projeto utiliza MongoDB para armazenar as vagas.
+# Configuração do MongoDB
 
 Crie um arquivo `.env` na raiz do projeto:
 
@@ -218,7 +243,19 @@ __pycache__/
 *.pyc
 ```
 
-## Executando o crawler
+## Verificando o MongoDB no Windows
+
+```powershell
+Get-Service MongoDB
+```
+
+Se estiver parado:
+
+```powershell
+Start-Service MongoDB
+```
+
+# Executando o crawler
 
 Para realizar uma coleta manual:
 
@@ -226,13 +263,11 @@ Para realizar uma coleta manual:
 python -m crawler.crawler
 ```
 
-O crawler acessará a página de vagas de estágio da Programathor, coletará as vagas disponíveis, tratará os dados e salvará as informações no MongoDB.
+O crawler acessa a página de vagas de estágio da Programathor, coleta as vagas disponíveis, trata os dados e salva as informações no MongoDB.
 
-As vagas existentes são identificadas pela URL.
+As vagas existentes são identificadas pela URL. Caso uma vaga já exista, seus dados são atualizados. Caso seja uma vaga nova, um novo documento é criado.
 
-Caso uma vaga já exista, seus dados são atualizados. Caso seja uma nova vaga, um novo documento é criado.
-
-## Atualização automática
+# Atualização automática
 
 O projeto possui um scheduler que executa o crawler automaticamente em intervalos de 30 minutos.
 
@@ -242,27 +277,11 @@ Execute:
 python -m crawler.scheduler
 ```
 
-Exemplo de execução:
-
-```text
-Atualizando vagas...
-Quantidade de vagas encontradas: 15
-
-Vaga salva: ...
-Vaga salva: ...
-Vaga salva: ...
-
-Atualização concluída.
-Próxima atualização em 30 minutos.
-```
-
-Enquanto o processo estiver sendo executado, o crawler verificará periodicamente as vagas disponíveis.
-
 O scheduler precisa permanecer em execução para que as atualizações automáticas continuem acontecendo.
 
-## Executando a API
+# Executando a API
 
-Na raiz do projeto, execute:
+Na raiz do projeto:
 
 ```bash
 uvicorn api.main:app --reload
@@ -274,19 +293,15 @@ A API ficará disponível em:
 http://127.0.0.1:8000
 ```
 
-## Documentação da API
-
-O FastAPI disponibiliza documentação interativa automaticamente através do Swagger.
-
-Acesse:
+A documentação Swagger fica disponível em:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-## Endpoints
+# Endpoints
 
-### Listar todas as vagas
+## Listar todas as vagas
 
 ```http
 GET /vagas
@@ -298,22 +313,11 @@ Exemplo:
 http://127.0.0.1:8000/vagas
 ```
 
-Resposta:
-
-```json
-{
-    "total": 15,
-    "vagas": []
-}
-```
-
-### Buscar vagas
+## Buscar vagas
 
 ```http
 GET /vagas/buscar
 ```
-
-A busca permite combinar diferentes filtros.
 
 Filtros disponíveis:
 
@@ -325,47 +329,23 @@ Filtros disponíveis:
 | `nivel` | Nível da vaga | `junior` |
 | `contrato` | Tipo de contrato | `estagio` |
 
-### Buscar por tecnologia
+Exemplos:
 
 ```text
 http://127.0.0.1:8000/vagas/buscar?tecnologias=python
 ```
 
-### Buscar por modalidade
-
 ```text
 http://127.0.0.1:8000/vagas/buscar?modalidade=remoto
 ```
-
-### Buscar várias tecnologias
 
 ```text
 http://127.0.0.1:8000/vagas/buscar?tecnologias=python,javascript
 ```
 
-Nesse caso, a vaga precisa possuir Python e JavaScript.
-
-### Combinar filtros
-
-Exemplo:
-
 ```text
 http://127.0.0.1:8000/vagas/buscar?tecnologias=python&modalidade=hibrido&nivel=junior&contrato=estagio
 ```
-
-Essa consulta procura vagas que sejam simultaneamente:
-
-```text
-Python
-+
-Híbrido
-+
-Júnior
-+
-Estágio
-```
-
-Os filtros podem ser combinados de acordo com o perfil de vaga desejado.
 
 ## Buscar vaga por ID
 
@@ -373,25 +353,7 @@ Os filtros podem ser combinados de acordo com o perfil de vaga desejado.
 GET /vagas/{id}
 ```
 
-Exemplo:
-
-```text
-http://127.0.0.1:8000/vagas/ID_DA_VAGA
-```
-
-Caso a vaga não exista ou o ID seja inválido, a API retorna:
-
-```json
-{
-    "detail": "Vaga não encontrada"
-}
-```
-
-com status HTTP:
-
-```text
-404 Not Found
-```
+Caso a vaga não exista ou o ID seja inválido, a API retorna `404 Not Found`.
 
 ## Estatísticas
 
@@ -399,119 +361,122 @@ com status HTTP:
 GET /estatisticas
 ```
 
-Esse endpoint disponibiliza informações gerais sobre as vagas armazenadas.
-
-Exemplo:
+Exemplo de resposta:
 
 ```json
 {
-    "total_vagas": 15,
-    "total_empresas": 14,
-    "modalidades": {
-        "remoto": 8,
-        "hibrido": 5,
-        "presencial": 2
-    }
+  "total_vagas": 15,
+  "total_empresas": 14,
+  "modalidades": {
+    "remoto": 8,
+    "hibrido": 5,
+    "presencial": 2
+  }
 }
 ```
 
 Os valores dependem das vagas armazenadas no momento da consulta.
 
-## Filtros
+# Dashboard
 
-### Modalidade
+O dashboard foi desenvolvido com HTML, CSS e JavaScript puro.
 
-As modalidades utilizadas são:
+O JavaScript utiliza a **Fetch API** para consumir os endpoints da FastAPI e atualizar a interface dinamicamente.
+
+### `/estatisticas`
+
+Utilizado para carregar:
+
+- Total de vagas
+- Total de empresas
+- Vagas remotas
+- Vagas híbridas
+- Vagas presenciais
+- Gráfico de vagas por modalidade
+
+### `/vagas`
+
+Utilizado para:
+
+- Listagem das vagas
+- Gráfico de vagas por localização
+- Contagem dos registros
+
+### `/vagas/buscar`
+
+Utilizado pela pesquisa e pelos filtros do dashboard.
+
+### `/vagas/{id}`
+
+Utilizado para carregar os detalhes completos de uma vaga ao clicar em **Ver detalhes**.
+
+## Executando o dashboard
+
+Abra o arquivo:
 
 ```text
-Remoto
-Híbrido
-Presencial
+dashboard/index.html
 ```
 
-A API também trata valores enviados sem acento.
+utilizando a extensão **Live Server** do VS Code.
 
-Exemplo:
+Normalmente o dashboard ficará disponível em:
 
 ```text
-modalidade=hibrido
+http://127.0.0.1:5500/dashboard/index.html
 ```
 
-é convertido para:
+# CORS
+
+Como o dashboard e a API utilizam portas diferentes durante o desenvolvimento, a FastAPI possui configuração de CORS.
+
+O front-end pode ser executado em:
 
 ```text
-Híbrido
-```
-
-### Nível
-
-Exemplo:
-
-```text
-nivel=junior
-```
-
-é tratado como:
-
-```text
-Júnior
-```
-
-### Contrato
-
-Atualmente o crawler está configurado para coletar vagas de estágio.
-
-É possível utilizar:
-
-```text
-contrato=estagio
-```
-
-que corresponde a:
-
-```text
-Estágio
-```
-
-## CORS
-
-A API possui configuração de CORS para permitir a comunicação com o front-end durante o desenvolvimento.
-
-Dessa forma, um front-end executando, por exemplo, em:
-
-```text
-http://localhost:3000
+http://127.0.0.1:5500
 ```
 
 ou:
 
 ```text
-http://localhost:5173
+http://localhost:5500
 ```
 
-pode consumir a API executada em:
+e consumir a API em:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## Executando o projeto
+# Executando o projeto completo
 
-Para utilizar o projeto completo durante o desenvolvimento, podem ser utilizados dois terminais.
+Durante a demonstração, mantenha os serviços necessários em execução.
 
-### Terminal 1 - API
+## Terminal 1 - API
 
 ```bash
 uvicorn api.main:app --reload
 ```
 
-### Terminal 2 - Atualização automática
+## Terminal 2 - Crawler
+
+Coleta manual:
+
+```bash
+python -m crawler.crawler
+```
+
+ou atualização automática:
 
 ```bash
 python -m crawler.scheduler
 ```
 
-Dessa forma:
+## Front-end
+
+Abra `dashboard/index.html` utilizando o Live Server.
+
+Fluxo completo:
 
 ```text
 Programathor
@@ -522,14 +487,12 @@ MongoDB
       ↓
 FastAPI
       ↓
-Front-end
+Dashboard
 ```
 
-O scheduler verifica periodicamente novas vagas, o MongoDB mantém os dados armazenados e a API disponibiliza essas informações para o front-end.
+# Requirements
 
-## Requirements
-
-As dependências do projeto estão disponíveis no arquivo:
+As dependências Python estão no arquivo:
 
 ```text
 requirements.txt
@@ -541,9 +504,11 @@ Para instalar:
 pip install -r requirements.txt
 ```
 
-## Status do projeto
+HTML, CSS, JavaScript e Chart.js não são instalados através do `requirements.txt`.
 
-### Backend
+# Status do projeto
+
+## Backend
 
 - [x] Web Crawler
 - [x] Tratamento dos dados
@@ -557,32 +522,35 @@ pip install -r requirements.txt
 - [x] Scheduler
 - [x] CORS
 
-### Front-end
+## Front-end
 
-- [ ] Interface
-- [ ] Integração com API
-- [ ] Filtros visuais
-- [ ] Cards das vagas
-- [ ] Página/detalhes da vaga
-- [ ] Dashboard de estatísticas
+- [x] Interface responsiva
+- [x] Integração com a API
+- [x] Filtros visuais
+- [x] Pesquisa pela API
+- [x] Cards de indicadores
+- [x] Gráfico de modalidades
+- [x] Gráfico de localização
+- [x] Tabela de vagas
+- [x] Modal de detalhes
+- [x] Link para a vaga original
+- [x] Loading
+- [x] Tratamento de erros
+- [x] Mensagem para ausência de resultados
 
-## Próximas etapas
+# Possíveis próximas etapas
 
-O próximo passo do projeto é desenvolver o front-end e integrá-lo à API.
+O sistema principal está funcional.
 
-A interface deverá permitir que o usuário selecione características da vaga desejada, como tecnologias, modalidade e nível.
+Como melhorias futuras, podem ser consideradas:
 
-A API retornará somente as vagas compatíveis com os filtros selecionados.
-
-Também estão previstas:
-
-- Exibição das vagas em cards
-- Visualização detalhada das vagas
-- Dashboard de estatísticas
 - Deploy do backend
 - Deploy do front-end
 - Execução contínua do crawler em ambiente de produção
+- Paginação das vagas
+- Novos indicadores e gráficos
+- Ampliação das fontes de coleta
 
-## Observação
+# Observação
 
-O projeto foi desenvolvido para fins acadêmicos como parte da CP5, com foco na aplicação prática de conceitos de Python, Web Scraping, APIs REST e bancos de dados NoSQL.
+O projeto foi desenvolvido para fins acadêmicos como parte da CP5, com foco na aplicação prática de conceitos de Python, Web Scraping, APIs REST, bancos de dados NoSQL e desenvolvimento web.
